@@ -207,6 +207,8 @@
     box-shadow:2px 0 4px rgba(18,60,35,.08);
   }
   thead th{background:#dcf1e3;color:var(--green);font-weight:800;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;border-bottom:2px solid var(--accent);}
+  .month-full{display:inline;}
+  .month-abbr{display:none;}
   thead th:first-child{background:#dcf1e3;}
   tbody td:first-child{background:#eef8f1;}
   tbody tr:nth-child(even){background:#f1f9f4;}
@@ -230,9 +232,11 @@
     table{min-width:640px;font-size:11px;table-layout:fixed;}
     th,td{padding:6px 4px;overflow:hidden;text-overflow:ellipsis;}
     th:first-child,td:first-child{
-      width:82px;white-space:normal;font-size:10px;line-height:1.2;word-break:break-word;overflow:visible;text-overflow:clip;
+      width:82px;white-space:normal;font-size:8.5px;line-height:1.15;word-break:break-word;overflow:visible;text-overflow:clip;
     }
     th:not(:first-child),td:not(:first-child){width:46px;}
+    .month-abbr{display:inline;}
+    .month-full{display:none;}
     #salaryTable input[type="number"]{
       width:40px !important;padding:4px 1px !important;font-size:16px !important;
     }
@@ -255,7 +259,7 @@
     <div class="stat-grid" id="salaryStats" style="margin-top:14px;"></div>
 
     <details class="more" id="salaryDetails">
-      <summary>Таблица по месяцам — ввод и подробности</summary>
+      <summary>Заполнить данные</summary>
       <p class="sub" style="margin:0 0 10px;">Введите факт за месяц — премия и итог считаются автоматически по плану</p>
       <div class="table-wrap" style="box-shadow:none;border:none;padding:0;margin-bottom:14px;">
         <table id="salaryTable"></table>
@@ -271,7 +275,7 @@
 
   <div class="info-toggle-row">
     <button class="tab info-tab-btn" id="infoToggleBtn">Информация</button>
-    <button class="tab info-tab-btn" id="periodsToggleBtn">📈 Данные по периодам</button>
+    <button class="tab info-tab-btn" id="periodsToggleBtn">Данные по периодам</button>
   </div>
 
   <div id="infoPanel" class="panel info-highlight" style="display:none;margin-bottom:16px;margin-top:14px;">
@@ -828,7 +832,7 @@ function renderPeriodTable(){
     {label:'Вернувшихся', data:p.returned_visitors, fmt:fmtNum, pct:false},
     {label:'Постоянных посетителей', data:p.regular_visitors, fmt:fmtNum, pct:false},
   ];
-  const head = '<thead><tr><th>Показатель</th>' + p.months.map(m=>`<th>${m}</th>`).join('') + '<th>Ср. за период</th></tr></thead>';
+  const head = '<thead><tr><th>Показатель</th>' + p.months.map(m=>`<th><span class="month-full">${m}</span><span class="month-abbr">${m.slice(0,3)}</span></th>`).join('') + '<th>Ср. за период</th></tr></thead>';
   const body = '<tbody>' + rows.map(r=>{
     const cells = r.data.map(v=>`<td>${r.fmt(v)}</td>`).join('');
     const a = avg(r.data);
@@ -938,12 +942,16 @@ function updateSalaryComputed(){
     const monthSalary = totalArr[curIdx];
     const curPct = pctArr[curIdx] ?? 0;
     const pctColor = curPct>=1 ? 'var(--green)' : (curPct>=0.8 ? 'var(--amber)' : 'var(--red)');
+    const planPuMonth = plan.trial_attended[curIdx];
+    const planNewMonth = plan.new_students[curIdx];
     statsBox.innerHTML = `
       <div class="stat">
-        <div class="label">Зарплата за текущий месяц</div>
+        <div class="label">За текущий месяц</div>
         <div class="value" style="color:var(--accent);font-size:26px;">${fmtMoney(monthSalary)}</div>
       </div>
       <div class="stat"><div class="label">% плана за текущий месяц</div><div class="value" style="color:${pctColor};">${(curPct*100).toFixed(0)}%</div></div>
+      <div class="stat"><div class="label">План: пришли на ПУ (${monthName})</div><div class="value" style="color:#db2777;">${planPuMonth==null?'—':fmtNum(planPuMonth)}</div></div>
+      <div class="stat"><div class="label">План: новых учеников (${monthName})</div><div class="value" style="color:#db2777;">${planNewMonth==null?'—':fmtNum(planNewMonth)}</div></div>
     `;
   }
 }
@@ -952,7 +960,7 @@ function renderSalaryTable(){
   const plan = getPlanPeriod();
   const n = plan.months.length;
 
-  const head = '<thead><tr><th>Показатель</th>' + plan.months.map(m=>`<th>${m}</th>`).join('') + '<th>Итого/Ср.</th></tr></thead>';
+  const head = '<thead><tr><th>Показатель</th>' + plan.months.map(m=>`<th><span class="month-full">${m}</span><span class="month-abbr">${m.slice(0,3)}</span></th>`).join('') + '<th>Итого/Ср.</th></tr></thead>';
 
   const planPuRow = '<tr><td style="color:var(--ink-soft)">План: пришли на ПУ</td>' +
     plan.trial_attended.map(v=>`<td style="color:var(--ink-soft)">${v==null?'—':Math.round(v)}</td>`).join('') +
@@ -962,7 +970,7 @@ function renderSalaryTable(){
     `<td style="color:var(--ink-soft)"><b>${fmtNum(sum(plan.new_students))}</b></td></tr>`;
 
   const inputRow = (label, field) => '<tr><td>'+label+'</td>' +
-    Array.from({length:n}, (_,i)=>`<td><input type="number" inputmode="numeric" min="0" style="width:64px;border:1px solid var(--line);border-radius:6px;padding:6px;font-size:16px;" value="${salaryFact[field][i] ?? ''}" oninput="onSalaryInput(${i},'${field}',this.value)"></td>`).join('') +
+    Array.from({length:n}, (_,i)=>`<td><input type="number" inputmode="numeric" min="0" style="width:64px;border:1px solid var(--line);border-radius:6px;padding:6px;font-size:16px;text-align:center;" value="${salaryFact[field][i] ?? ''}" oninput="onSalaryInput(${i},'${field}',this.value)"></td>`).join('') +
     '<td>—</td></tr>';
 
   const computedRow = (label, idPrefix, bold) => '<tr' + (bold?' class="total"':'') + '><td>'+label+'</td>' +

@@ -98,10 +98,12 @@
 
   .info-toggle-row{margin:8px 0 0;}
   .info-tab-btn{border-color:var(--green);color:var(--green);}
+  .info-tab-btn::after{content:"▸";margin-left:7px;font-size:10px;display:inline-block;}
   .info-tab-btn.active{
     background:linear-gradient(135deg,var(--green),#0d5c2c);color:#fff;border-color:transparent;
     box-shadow:0 4px 16px rgba(21,128,61,.4);
   }
+  .info-tab-btn.active::after{content:"▾";}
   .info-highlight{
     background:linear-gradient(160deg, #d6f3df, #bfe9cd);
     border:1px solid var(--green);
@@ -202,6 +204,14 @@
   table{border-collapse:collapse;width:100%;font-size:13px;min-width:920px;}
   @media (max-width:640px){
     .table-wrap{padding:12px;}
+    table{min-width:680px;font-size:11.5px;}
+    th,td{padding:6px 5px;}
+    th:first-child,td:first-child{
+      white-space:normal;max-width:76px;font-size:10.5px;line-height:1.25;
+    }
+    #salaryTable input[type="number"]{
+      width:46px !important;padding:5px 2px !important;font-size:16px !important;
+    }
   }
   th,td{padding:9px 10px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap;}
   th:first-child,td:first-child{
@@ -240,7 +250,7 @@
   </header>
 
   <div class="panel" style="margin-bottom:16px;">
-    <h3>💼 ЗП-менеджер</h3>
+    <h3>💰 ЗП-менеджер</h3>
     <p class="sub">Введите факт за месяц — премия и итог считаются автоматически по плану</p>
 
     <div class="stat-grid" id="salaryStats"></div>
@@ -259,6 +269,7 @@
 
   <div class="info-toggle-row">
     <button class="tab info-tab-btn" id="infoToggleBtn">Информация</button>
+    <button class="tab info-tab-btn" id="periodsToggleBtn">📈 Данные по периодам</button>
   </div>
 
   <div id="infoPanel" class="panel info-highlight" style="display:none;margin-bottom:16px;">
@@ -277,7 +288,7 @@
     <p class="sub" style="margin-top:14px;">% плана считается как среднее между «приход на ПУ» и «покупка абонемента» относительно плановых значений на месяц. Введённые данные ЗП сохраняются в этом браузере автоматически.</p>
   </div>
 
-  <h2 class="section-title">📈 Данные по периодам</h2>
+  <div id="periodsSection" style="display:none;margin-bottom:16px;">
   <p class="section-sub">Нажмите на период, чтобы посмотреть цифры по месяцам. Повторный клик сворачивает.</p>
 
   <div class="upload-box" style="margin-bottom:16px;max-width:none;">
@@ -305,6 +316,7 @@
         <table id="periodTable"></table>
       </div>
     </details>
+  </div>
   </div>
 
 </div>
@@ -687,8 +699,26 @@ const infoToggleBtn = document.getElementById('infoToggleBtn');
 if (infoToggleBtn){
   infoToggleBtn.addEventListener('click', function(){
     infoOpen = !infoOpen;
-    document.getElementById('infoPanel').style.display = infoOpen ? '' : 'none';
+    const panel = document.getElementById('infoPanel');
+    panel.style.display = infoOpen ? '' : 'none';
     infoToggleBtn.classList.toggle('active', infoOpen);
+    if (infoOpen){
+      setTimeout(()=> panel.scrollIntoView({behavior:'smooth', block:'start'}), 50);
+    }
+  });
+}
+
+let periodsOpen = false;
+const periodsToggleBtn = document.getElementById('periodsToggleBtn');
+if (periodsToggleBtn){
+  periodsToggleBtn.addEventListener('click', function(){
+    periodsOpen = !periodsOpen;
+    const section = document.getElementById('periodsSection');
+    section.style.display = periodsOpen ? '' : 'none';
+    periodsToggleBtn.classList.toggle('active', periodsOpen);
+    if (periodsOpen){
+      setTimeout(()=> section.scrollIntoView({behavior:'smooth', block:'start'}), 50);
+    }
   });
 }
 

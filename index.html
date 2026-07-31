@@ -35,8 +35,10 @@
     --radius:18px;
   }
   *{box-sizing:border-box;}
+  html{overflow-x:hidden;}
   body{
     margin:0;
+    overflow-x:hidden;
     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
     background:
       radial-gradient(900px 500px at 8% -10%, rgba(22,163,74,.16), transparent 60%),
@@ -46,6 +48,9 @@
     -webkit-font-smoothing:antialiased;
   }
   .wrap{max-width:1280px;margin:0 auto;padding:28px 24px 80px;}
+  @media (max-width:640px){
+    .wrap{padding:18px 12px 60px;}
+  }
 
   header.top{
     display:flex;flex-direction:column;align-items:center;text-align:center;
@@ -163,6 +168,10 @@
 
   .bars{display:flex;align-items:flex-end;gap:6px;height:150px;margin:14px 0 6px;padding:0 2px;}
   .bars .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;}
+  @media (max-width:640px){
+    .bars{overflow-x:auto;justify-content:flex-start;-webkit-overflow-scrolling:touch;padding-bottom:6px;}
+    .bars .bar-col{flex:0 0 42px;}
+  }
   .bars .bar-value{font-size:10.5px;font-weight:700;color:var(--ink-soft);white-space:nowrap;}
   .bars .bar{
     width:100%;max-width:26px;border-radius:6px 6px 3px 3px;
@@ -189,8 +198,11 @@
   details.more[open] summary{background:var(--accent);color:#fff;margin-bottom:16px;}
 
   .table-wrap{background:linear-gradient(180deg, var(--card), var(--card2));border-radius:var(--radius);border:1px solid var(--line);
-    box-shadow:var(--shadow);padding:18px;overflow-x:auto;margin-bottom:16px;}
+    box-shadow:var(--shadow);padding:18px;overflow-x:auto;margin-bottom:16px;-webkit-overflow-scrolling:touch;}
   table{border-collapse:collapse;width:100%;font-size:13px;min-width:920px;}
+  @media (max-width:640px){
+    .table-wrap{padding:12px;}
+  }
   th,td{padding:9px 10px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap;}
   th:first-child,td:first-child{
     text-align:left;position:sticky;left:0;z-index:2;
@@ -208,6 +220,7 @@
   tbody tr.total td:first-child{background:#dcf1e3;}
   input[type="number"]{
     background:#ffffff;color:var(--ink);border:1px solid var(--line);
+    font-size:16px;
   }
   input[type="number"]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(22,163,74,.2);}
 
@@ -893,7 +906,7 @@ function renderSalaryTable(){
     `<td style="color:var(--ink-soft)"><b>${fmtNum(sum(plan.new_students))}</b></td></tr>`;
 
   const inputRow = (label, field) => '<tr><td>'+label+'</td>' +
-    Array.from({length:n}, (_,i)=>`<td><input type="number" min="0" style="width:64px;border:1px solid var(--line);border-radius:6px;padding:4px 6px;font-size:12.5px;" value="${salaryFact[field][i] ?? ''}" oninput="onSalaryInput(${i},'${field}',this.value)"></td>`).join('') +
+    Array.from({length:n}, (_,i)=>`<td><input type="number" inputmode="numeric" min="0" style="width:64px;border:1px solid var(--line);border-radius:6px;padding:6px;font-size:16px;" value="${salaryFact[field][i] ?? ''}" oninput="onSalaryInput(${i},'${field}',this.value)"></td>`).join('') +
     '<td>—</td></tr>';
 
   const computedRow = (label, idPrefix, bold) => '<tr' + (bold?' class="total"':'') + '><td>'+label+'</td>' +
